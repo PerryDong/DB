@@ -1,0 +1,219 @@
+1.排序检索数据 ORDER BY
+
+默认升序：SELECT prod_name FROM products ORDER BY prod_price, prod_name (ASC);
+降序排列：SELECT prod_name, prod_price FROM products ORDER BY prod_price DESC;
+取最大值：SELECT prod_price FROM products ORDER BY prod_price DESC LIMIT 1;
+
+2.过滤数据 WHERE
+
+检查单个值
+SELECT prod_name FROM products WHERE prod_name = 'fuses';
+SELECT prod_name FROM products WHERE prod_price <= 10;
+不匹配检查
+SELECT prod_name FROM products WHERE vend_id <> 1003;
+范围值检查 BETWEEN
+SELECT prod_name FROM products WHERE prod_price BETWEEN 5 AND 10;
+空值检查
+SELECT cust_id FROM customers WHERE cust_email IS NULL
+
+OR操作符
+SELECT prod_name, prod_price FROM products WHERE vend_id = 1002 OR vend_id = 1003;
+IN操作符
+SELECT prod_name, prod_price FROM products WHERE vend_id IN (1002, 1003);
+NOT操作符 否定条件
+SELECT prod_name, prod_price FROM products WHERE vend_id NOT IN (1002, 1003);
+
+%通配符：任何字符出现任意次数
+SELECT prod_id, prod_name FROM products WHERE prod_name LIKE 'jet%';
+_通配符：匹配单个字符
+SELECT prod_id, prod_name FROM products WHERE prod_name LIKE '_ jet';
+
+3.使用正则表达式搜索 REGEXP
+
+SELECT prod_name FROM products WHERE prod_name REGEXP '1000|2000';
+SELECT prod_name FROM products WHERE prod_name REGEXP '[1-5] Ton';
+
+4.创建计算字段
+
+拼接 Concat()
+SELECT Concat(vend_name, '(', vend_country, ')') FROM vendors;
+别名 AS
+SELECT Concat(vend_name, '(', vend_country, ')') AS vend_title FROM vendors;
+算数计算
+SELECT prod_id, quantity, item_price, quantity*item_price AS expanded_price FROM orderitems;
+
+5.数据处理函数
+
+文本处理函数
+Left() 返回串左边的字符
+Length() 返回串的长度
+Locate() 找出串的一个子串
+Lower() 将串转换为小写
+LTrim() 去掉串左边的空格
+Right() 返回串右边的字符
+RTrim() 去掉串右边的空格
+Soundex() 返回串的SOUNDEX值
+SubString() 返回子串的字符
+Upper() 将串转换为大写
+
+日期时间处理函数
+AddDate() 增加一个日期（天、周等）
+AddTime() 增加一个时间（时、分等）
+CurDate() 返回当前日期
+CurTime() 返回当前时间
+Date() 返回日期时间的日期部分
+DateDiff() 计算两个日期之差
+Date_Add() 高度灵活的日期运算函数
+Date_Format() 返回一个格式化的日期或时间串
+Day() 返回一个日期的天数部分
+DayOfWeek() 对于一个日期，返回对应的星期几
+Hour() 返回一个时间的小时部分
+Minute() 返回一个时间的分钟部分
+Month() 返回一个日期的月份部分
+Now() 返回当前日期和时间
+Second() 返回一个时间的秒部分
+Time() 返回一个日期时间的时间部分
+Year() 返回一个日期的年份部分
+
+数值处理函数
+Abs() 返回一个数的绝对值
+Cos() 返回一个角度的余弦
+Exp() 返回一个数的指数值
+Mod() 返回除操作的余数
+Pi() 返回圆周率
+Rand() 返回一个随机数
+Sin() 返回一个角度的正弦
+Sqrt() 返回一个数的平方根
+Tan() 返回一个角度的正切
+
+6.汇总数据
+
+聚集函数
+AVG() 返回某列的平均值
+COUNT() 返回某列的行数
+MAX() 返回某列的最大值
+MIN() 返回某列的最小值
+SUM() 返回某列值之和
+SELECT COUNT(*) AS num_cust From customers;
+SELECT SUM(item_price*quantity) AS total_price FROM orderitems WHERE order_num = 20005;
+
+聚集不同值 DISTINCT
+SELECT AVG(DISTINCT prod_price) AS avg_price FROM products;
+
+7.数据分组 GROUP BY
+SELECT vend_id, COUNT(*) AS num_prods FROM products GROUP BY vend_id;
+
+过滤分组：WHERE过滤指定的行，使用HAVING过滤分组
+SELECT cust_id, COUNT(*) AS orders FROM orders GROUP BY cust_id HAVING COUNT(*) >= 2;
+
+分组排序 ORDER BY
+SELECT order_num, SUM(quantity*item_price) AS ordertotal FROM orderitems GROUP BY order_num 
+HAVING SUM(quantity*item_price) >= 50 ORDER BY ordertotal;
+
+8.子查询
+SELECT cust_name, cust_state, (SELECT COUNT(*) FROM orders WHERE orders.cust_id = customers.cust_id) AS orders
+FROM customers ORDER BY cust_name;
+
+9.组合查询 UNION
+合并查询结果，默认去除重复行。
+SELECT vend_id, prod_id, prod_price FROM products WHERE prod_price <= 5
+UNION 
+SELECT vend_id, prod_id, prod_price FROM products WHERE vend_id IN (1001, 1002);
+
+10.全文本搜索 Match() 和 Against()
+SELECT note_text FROM productnotes WHERE Match(note_text) Against('rabbit');
+Match() 指示MySQL针对指定的列进行搜索,传 递 给 Match()的值必须与FULLTEXT()定义中的相同
+Against()指定要使用的搜索表达式。
+
+11.插入数据
+INSERT INTO Customers VALUES(NULL, 'Pep E', '100 Street', 'Los Angels', 'CA', '90046', 'USA', NULL, NULL);
+INSERT INTO Customers(cust_name, cust_address, cust_city, cust_zip, cust_country, cust_contact, cust_email)
+VALUES(NULL, 'Pep E', '100 Street', 'Los Angels', 'CA', '90046', 'USA', NULL, NULL);
+
+12.更新
+UPDATE customers SET cust_email = 'elmer@fudd.com' WHERE cust_id = 10005;
+
+13.删除
+DELETE FROM customers WHERE cust_id = 10006;
+
+14.表更新
+ALTER TABLE vendors ADD vend_phone CHAR(20); 给vendors表增加一个名为vend_phone的列
+ALTER TABLE vendors DROP COLUMN vend_phone;删除列
+ALTER TABLE orderitems ADD CONSTRAINT fk_orderitems_orders FOREIGN KEY (order_num) REFERENCE orders (order_num);增加外键
+DROP TABLE customers2; 删除表
+RENAME TABLE customers2 TO customers; 重命名表
+
+15.视图
+视图是虚拟的表，不对应实际存在的表。
+创建视图
+CREATE VIEW customeremaillist AS SELECT cust_id, cust_name, cust_email FROM customers WHERE cust_email IS NOT NULL;
+
+16.存储过程
+创建存储过程
+CREAT PROCEDURE productpricing(OUT pl DECIMAL(8, 2), OUT ph DECIMAL(8, 2), OUT pa DECIMAL(8, 2))
+BEGIN
+	SELECT Min(prod_price) INTO pl FROM products;
+	SELECT Max(prod_price) INTO ph FROM products;
+	SELECT Avg(prod_price) INTO pa FROM products;
+END;
+调用存储过程
+CALL productpricing(@pricelow, @pricehigh, @priceaverage);
+显示结果
+SELECT @pricelow, @pricehigh, @priceaverage;
+
+包含输入和输出的存储过程
+CREAT PROCEDURE ordertotal(IN onumber INT, OUT ototal DECIMAL(8, 2))
+BEGIN
+	SELECT SUM(item_price*quantity) FROM orderitems WHERE order_num = onumber INTO ototal;
+END;
+CALL ordertotal(20005, @total);
+SELECT @total;
+
+17.游标
+MySQL游标只能用于存储过程，在检索结果中前进或后退多行
+创建游标 使用DECLARE 声明
+打开游标 OPEN
+关闭游标 CLOSE
+
+例如循环检索数据，从第一行到最后一行：
+CREAT PROCEDURE processorders()
+BEGIN
+	DECLARE done BOOLEAN DEFAULT 0;
+	DECLARE o INT;
+	DECLARE ordernumbers CURSOR FOR SELECT order_num FROM orders;
+	DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = 1;
+	OPEN ordernumbers;
+	REPEAT 
+		FETCH ordernumbers INTO o;
+	UNTIL done END REPEAT;
+	CLOSE ordernumbers;
+END;
+	
+18.触发器
+某些语句在事件发生时自动执行，只有表支持触发器
+创建触发器
+CREATE TRIGGER newproduct AFTER INSERT ON products 
+FOR EACH ROW SELECT 'Product added'
+删除触发器
+DROP TRIGGER newproduct;
+
+INSERT触发器
+在INSERT触发器代码内，可引用一个名为NEW的虚拟表，访问被插入的行；
+在BEFORE INSERT触发器中， NEW中的值也可以被更新（允许更改被插入的值）；
+对于AUTO_INCREMENT列， NEW在INSERT执行之前包含0，在INSERT执行之后包含新的自动生成值。
+CREATE TRIGGER neworder AFTER INSERT ON orders FOR EACH ROW SELECT NEW.order_num;
+
+DELETE触发器
+在DELETE触发器代码内，可以引用一个名为OLD的虚拟表，访问被删除的行;
+OLD中的值全都是只读的，不能更新。
+CREATE TRIGGER deleteorder BEFORE DELETE ON orders FOR EACH ROW 
+BEGIN
+	INSERT INTO archive_orders(order_num, order_date, cust_id)
+	VALUES(OLD.order_num, OLD.order_date, OLD.cust_id);
+END;
+
+UPDATE触发器
+在UPDATE触发器代码中，可以引用一个名为OLD的虚拟表访问以前（UPDATE语句前）的值，引用一个名为NEW的虚拟表访问新更新的值；
+在BEFORE UPDATE触发器中， NEW中的值可能也被更新（允许更改将要用于UPDATE语句中的值）；
+OLD中的值全都是只读的，不能更新。
+CREATE TRIGGER updatevendor BEFORE UPDATE ON vendors FOR EACH ROW SET NEW.vend_state = Upper(NEW.vend_state);
