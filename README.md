@@ -1,2 +1,1 @@
-# DB
-Mysql 相关学校
+Mysql 相关学习
